@@ -1,0 +1,27 @@
+{
+  "name": "simple-deep-equal",
+  "version": "1.0.0",
+  "description": "A simple deep equal util",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^4.1.0"
+  },
+  "scripts": {
+    "test": "mocha index.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryancat/simple-deep-equal.git"
+  },
+  "keywords": [
+    "deep",
+    "euqal"
+  ],
+  "author": "Ryan Chen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ryancat/simple-deep-equal/issues"
+  },
+  "homepage": "https://github.com/ryancat/simple-deep-equal#readme"
+}
