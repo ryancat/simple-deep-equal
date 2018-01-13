@@ -170,7 +170,7 @@ describe('deepEqualUtil', function() {
     it('should be finishing within 1s for big test cases', function () {
       var deepEqualResult;
       var duration = Date.now();
-      // testcase will be a 5500+ lines of array of objects and concat for 2^17 times
+      // testcase will be a 5500+ lines of array of objects and concat for 2^16 times
       var testcase = [
         {
           "_id": "5a595020e7cecda0eef4d26b",
@@ -5874,7 +5874,7 @@ describe('deepEqualUtil', function() {
         }
       ];
 
-      var i = 17;
+      var i = 16;
       while (i--) {
         testcase = testcase.concat(testcase);
       }
