@@ -90,8 +90,8 @@ var Util = {
    */
   deepEqualWithMessage: function (actual, expected) {
     var notEqualMessages = [],
-        isDeepEqual = Util.deepEqual(actual, expected, function (...message) {
-          notEqualMessages.push(message.join(''));
+        isDeepEqual = Util.deepEqual(actual, expected, function () {
+          notEqualMessages.push(Array.prototype.slice.call(arguments).join(''));
         });
 
     return {
