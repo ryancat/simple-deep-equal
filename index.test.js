@@ -123,6 +123,34 @@ describe('deepEqualUtil', function() {
         [{}, [], {a: 123}, [false, ['false', ['0'], '', 'abc'], undefined, null]]);
       assert(!deepEqualResult.isDeepEqual, deepEqualResult.message);
     });
+
+    it('should be able to compare array with circular reference', function () {
+      var deepEqualResult;
+
+      var a = [];
+      a.push(a);
+
+      var b = [];
+      b.push(b);
+      deepEqualResult = deepEqualUtil.deepEqualWithMessage(a, b);
+      assert(deepEqualResult.isDeepEqual, deepEqualResult.message);
+
+      var c = [1];
+      c.push(c);
+
+      var d = [2];
+      d.push(d);
+      deepEqualResult = deepEqualUtil.deepEqualWithMessage(c, d);
+      assert(!deepEqualResult.isDeepEqual, deepEqualResult.message);
+
+      var e = [1, 2, 3],
+          f = [1, 2, 3];
+
+      e.push(f);
+      f.push(e);
+      deepEqualResult = deepEqualUtil.deepEqualWithMessage(e, f);
+      assert(deepEqualResult.isDeepEqual, deepEqualResult.message);
+    });
   });
   
   describe('object type', function () {
@@ -163,6 +191,34 @@ describe('deepEqualUtil', function() {
         {a: 123, b: {bb: true, c: ['abcd', 'false'], e: undefined}, f: null, g: NaN},
         {a: 123, b: {bb: true, c: ['abcd', 'true'], e: undefined}, f: null, g: NaN});
       assert(!deepEqualResult.isDeepEqual, deepEqualResult.message);
+    });
+
+    it('should be able to compare object with circular reference', function () {
+      var deepEqualResult;
+
+      var a = {};
+      a.foo = a;
+
+      var b = {};
+      b.foo = b;
+      deepEqualResult = deepEqualUtil.deepEqualWithMessage(a, b);
+      assert(deepEqualResult.isDeepEqual, deepEqualResult.message);
+
+      var c = {foo: [1]};
+      c.bar = c;
+
+      var d = {foo: [2]};
+      d.bar = d;
+      deepEqualResult = deepEqualUtil.deepEqualWithMessage(c, d);
+      assert(!deepEqualResult.isDeepEqual, deepEqualResult.message);
+
+      var e = {foo: 1, bar: 2},
+          f = {foo: 1, bar: 2};
+
+      e.baz = f;
+      f.baz = e;
+      deepEqualResult = deepEqualUtil.deepEqualWithMessage(e, f);
+      assert(deepEqualResult.isDeepEqual, deepEqualResult.message);
     });
   });
 

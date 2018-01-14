@@ -1,4 +1,9 @@
 var Util = {
+  /**
+   * The iteration cache which will store iterated nodes
+   */
+  _iterCache: [],
+
   _isArray: function (item) {
     return Object.prototype.toString.call(item) === '[object Array]'
   },
@@ -7,24 +12,49 @@ var Util = {
     return Object.prototype.toString.call(item) === '[object Object]'
   },
 
-  _deepEqualLog: function (title, path, actual, expected) {
-    title = title || '';
-    path = path || [];
-    return title + ' ' + path.join(" -> ") + ' | actual: ' + JSON.stringify(actual) + ', expected: ' + JSON.stringify(expected);
+  _isUndefined: function (item) {
+    return typeof item === 'undefined';
   },
 
   /**
-   * Check the deep equal for primitive type values, array and objects.
-   * The native assert.deepEqual doesn't work well for NaN case as well
-   * as +0/-0 case. See https://github.com/substack/node-deep-equal for
-   * more details
+   * Stringify the given item.
+   * If the item has circular references, the circular references
+   * will be marked as [CIRCULAR REFERENCE]
    */
-  deepEqual: function (actual, expected, notEqualCallback, path) {
-    // console.log('actual: ', actual, 'expected: ', expected);
+  _stringify: function (item) {
+    var cache = [];
+
+    return JSON.stringify(item, function (key, value) {
+      if (typeof value === 'object' && value !== null) {
+        if (cache.indexOf(value) !== -1) {
+          // Found circular reference
+          return '[CIRCULAR REFERENCE]';
+        }
+
+        cache.push(value);
+        return value;
+      }
+
+      return value;
+    });
+  },
+
+  _deepEqualLog: function (title, path, actual, expected) {
+    title = title || '';
+    path = path || [];
+    return title + ' ' + path.join(" -> ") + ' | actual: ' + Util._stringify(actual) + ', expected: ' + Util._stringify(expected);
+  },
+
+  _doDeepEqual: function (actual, expected, notEqualCallback, path) {
     var iter;
 
     notEqualCallback = notEqualCallback || function () {};
     path = path || [];
+
+    if (Util._iterCache.indexOf(actual) !== -1) {
+      // We have iterated this node before and it passed deep equal check
+      return true;
+    }
 
     // Primitive type
     if (actual === expected) {
@@ -47,8 +77,10 @@ var Util = {
         return false;
       }
 
+      // Mark the actual and expected array has been iterated
+      Util._iterCache.push(actual);
       while (iter--) {
-        if (!Util.deepEqual(actual[iter], expected[iter], notEqualCallback, path.concat('[' + iter + ']'))) {
+        if (!Util._doDeepEqual(actual[iter], expected[iter], notEqualCallback, path.concat(iter))) {
           return false;
         }
       }
@@ -66,9 +98,11 @@ var Util = {
         return false;
       }
 
+      // Mark the actual and expected array has been iterated
+      Util._iterCache.push(actual);
       for (iter in actual) {
         if (actual.hasOwnProperty(iter)) {
-          if (!Util.deepEqual(actual[iter], expected[iter], notEqualCallback, path.concat(iter))) {
+          if (!Util._doDeepEqual(actual[iter], expected[iter], notEqualCallback, path.concat(iter))) {
             return false;
           }
         }
@@ -83,6 +117,18 @@ var Util = {
     // Default to false
     notEqualCallback(Util._deepEqualLog('[Value different]', path, actual, expected));
     return false;
+  },
+
+  /**
+   * Check the deep equal for primitive type values, array and objects.
+   * The native assert.deepEqual doesn't work well for NaN case as well
+   * as +0/-0 case. See https://github.com/substack/node-deep-equal for
+   * more details
+   */
+  deepEqual: function (actual, expected, notEqualCallback) {
+    notEqualCallback = notEqualCallback || function () {};
+    Util._iterCache = [];
+    return Util._doDeepEqual(actual, expected, notEqualCallback);
   },
 
   /**
@@ -101,4 +147,7 @@ var Util = {
   }
 };
 
-module.exports = Util;
+module.exports = {
+  deepEqual: Util.deepEqual,
+  deepEqualWithMessage: Util.deepEqualWithMessage
+};
