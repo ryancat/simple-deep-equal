@@ -8,7 +8,6 @@ var assert = require('assert'),
     deepEqualUtil = require('./index');
 
 describe('deepEqualUtil', function() {
-
   describe('primitive type', function () {
     it('should be able to compare number type values', function() {
       var deepEqualResult;
